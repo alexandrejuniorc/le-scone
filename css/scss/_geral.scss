@@ -13,3 +13,30 @@ img {
   display: block;
   max-width: 100%; // Faz com que a imagem fique responsiva
 }
+
+p {
+  @include tipo-1(18);
+}
+
+.titulo {
+  @include tipo-1(18);
+  text-transform: uppercase;
+
+  @include responsivo(mobile) {
+    margin-bottom: 40px;
+  }
+  &::after {
+    content: '';
+    display: block;
+    width: 75%;
+    float: right;
+    height: 2px;
+    margin-top: 14px;
+    background: $cinza;
+
+    // Responsivo do after no modo tablet
+    @include responsivo(tablet) {
+      width: 60%;
+    }
+  }
+}
