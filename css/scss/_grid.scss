@@ -1,0 +1,147 @@
+// Variaveis do grid
+
+$colunas: 12; // Colunas
+$gutter: 20px; // Margin left + Margin right
+
+// Breakpoints
+$dispositivo-desktop: 1200px; // Dispositivo desktop
+$dispositivo-tablet: 760px; // Dispositivo tablet
+$dispositivo-mobile: 480px; // Dispositivo mobile
+
+// Box-sizing - Tudo que tiver no HTML vai usar o border box
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  // a largura total sempre será o tamanho do width
+}
+
+// Mixin de media-querie (responsivo)
+@mixin responsivo($size) {
+  @if $size == desktop {
+    // Foi utilizado #{} para pegar o número da variável corretamente
+    @media screen and (min-width: #{$dispositivo-desktop}) {
+      @content; // Conteúdo que eu quero aqui dentro
+    }
+  } @else if $size == tablet {
+    @media screen and (min-width: #{$dispositivo-tablet}) and (max-width: #{$dispositivo-desktop - 1}) {
+      @content; // Conteúdo que eu quero aqui dentro
+    }
+  } @else if $size == mobile {
+    @media screen and (max-width: #{$dispositivo-tablet - 1}) {
+      @content; // Conteúdo que eu quero aqui dentro
+    }
+  }
+}
+
+// Função do grid
+
+@function grid($coluna, $offset: false) {
+  // Variável criada
+  $width: $coluna / $colunas * 100 + '%'; // Dá o tamanho de cada coluna do grid
+  $result: calc(
+    #{$width} - #{$gutter}
+  ); // Tamanho da coluna menos o gutter que são as margens
+  @if $offset == offset {
+    $gutter: $gutter / 2; // Se torna 10px
+    $result: calc(
+      #{$width} + #{$gutter}
+    ); // adiciona 10px ao invés de remover 20px
+  }
+  @return $result;
+}
+
+// Gera as classes de grid
+@for $i from 1 through $colunas {
+  .grid-#{$i} {
+    width: grid(
+      $i
+    ); // Valor $i está no loop então irá acompanhar de acordo com o número da coluna
+  }
+}
+
+// Mixin estrutura do grid
+@mixin estrutura-grid {
+  float: left;
+  min-height: 1px; // Sempre que tiver um valor de grid na tela ele irá ocupar um espaço
+  margin-left: $gutter / 2;
+  margin-right: $gutter / 2;
+
+  @include responsivo(mobile) {
+    width: 100%; // Não tem mais width pq ele fica com uma coluna só
+    float: none;
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}
+
+// Seletor
+// Seleciona todos os itens que tem o atributo class. O ˆ faz selecionar todos os itens que estão entre parenteses que no caso seria grid-
+[class^='grid-'] {
+  @include estrutura-grid;
+}
+
+// Gera as classes de offset
+@for $i from 1 through $colunas {
+  .offset-#{$i} {
+    margin-left: grid($i, offset);
+    // Valor $i está no loop então irá acompanhar de acordo com o número da coluna
+    @extend %offset;
+  }
+}
+
+// O offset tem que sumir quando ele for para o mobile
+@include responsivo(mobile) {
+  %offset {
+    margin-left: 0px;
+  }
+}
+
+// Mixin de clearfix
+@mixin clearfix {
+  &::after,
+  &::before {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+//Mixin de container
+@mixin container {
+  max-width: $dispositivo-desktop;
+  margin: 0px auto; // Sempre centralizado
+  position: relative;
+
+  @include responsivo(tablet) {
+    max-width: $dispositivo-tablet;
+  }
+  @include responsivo(mobile) {
+    max-width: $dispositivo-mobile;
+    // Margens para não ficar grudado na tela
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  @include clearfix;
+}
+
+.container {
+  @include container;
+}
+
+// Serve para quando quero div dentro de div e continue com a margem exata
+@mixin row {
+  position: relative;
+  margin-left: -$gutter / 2;
+  margin-right: -$gutter / 2;
+
+  @include responsivo(mobile) {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+  @include clearfix;
+}
+
+.row {
+  @include row;
+}
